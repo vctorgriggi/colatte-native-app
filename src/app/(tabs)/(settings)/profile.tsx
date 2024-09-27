@@ -64,10 +64,15 @@ export default function Profile() {
     return Object.keys(errors).length === 0;
   };
 
-  /* editing state */
+  /* editing action */
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const resetFormData = () => {
+  /* fix: these constants are not that necessary, so I will change them later. */
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
     setFormData({
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
@@ -105,9 +110,11 @@ export default function Profile() {
       setIsLoadingAnimation(true);
       const data = await updateById(user.id, dto);
       setUser(data);
+      handleSaveEdit();
       setSnackbarMessage("Sucesso na edição: as alterações foram salvas.");
       setSnackbarVisible(true);
     } catch (error) {
+      handleCancelEdit();
       if (error instanceof Error) {
         setSnackbarMessage(error.message);
       } else {
@@ -116,31 +123,6 @@ export default function Profile() {
       setSnackbarVisible(true);
     } finally {
       setIsLoadingAnimation(false);
-      resetFormData();
-    }
-  };
-
-  /* delete image */
-  // TODO: add loading state
-
-  const handleDeleteImage = async () => {
-    if (!user) return;
-
-    try {
-      const data = await deleteImage(user.id);
-      setUser(data);
-      setSnackbarMessage("Exclusão bem-sucedida: a imagem foi removida.");
-      setSnackbarVisible(true);
-    } catch (error) {
-      if (error instanceof Error) {
-        setSnackbarMessage(error.message);
-      } else {
-        setSnackbarMessage("An unexpected error occurred.");
-      }
-      setSnackbarVisible(true);
-    } finally {
-      setIsModalVisible(false);
-      handleDialogDismiss(); // it isn’t necessary, but it’s good practice.
     }
   };
 
@@ -200,6 +182,31 @@ export default function Profile() {
     clearImageState();
   };
 
+  /* delete image */
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const handleDeleteImage = async () => {
+    if (!user) return;
+
+    try {
+      setIsDeleting(true);
+      handleDialogDismiss(); // it isn’t necessary, but it’s good practice.
+      const data = await deleteImage(user.id);
+      setUser(data);
+      setSnackbarMessage("Exclusão bem-sucedida: a imagem foi removida.");
+      setSnackbarVisible(true);
+    } catch (error) {
+      if (error instanceof Error) {
+        setSnackbarMessage(error.message);
+      } else {
+        setSnackbarMessage("An unexpected error occurred.");
+      }
+      setSnackbarVisible(true);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   /* snackbar */
   const [snackbarVisible, setSnackbarVisible] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
@@ -223,7 +230,7 @@ export default function Profile() {
             source={{
               uri: user?.imageUrl
                 ? `${apiUrl}/${user.imageUrl}`
-                : "https://avatars.githubusercontent.com/vctorgriggi", // TODO: choose a better default image
+                : "https://avatars2.githubusercontent.com/u/131414077",
             }}
           />
           <TouchableOpacity
@@ -236,8 +243,14 @@ export default function Profile() {
               padding: 8,
               backgroundColor: colors.primary,
             }}
+            disabled={isDeleting}
           >
-            <MaterialIcons name="edit" size={24} color={colors.onPrimary} />
+            {!isDeleting && (
+              <MaterialIcons name="edit" size={24} color={colors.onPrimary} />
+            )}
+            {isDeleting && (
+              <ActivityIndicator size={16} color={colors.onPrimary} />
+            )}
           </TouchableOpacity>
         </View>
         <TextInput
@@ -277,7 +290,7 @@ export default function Profile() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             <Button
               mode="outlined"
-              onPress={resetFormData}
+              onPress={handleCancelEdit}
               style={styles.button}
             >
               Cancelar

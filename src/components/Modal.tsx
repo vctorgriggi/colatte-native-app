@@ -1,5 +1,5 @@
 import { Portal, Modal as PaperModal, useTheme } from "react-native-paper";
-import { View, StyleSheet } from "react-native";
+import { ScrollView, View, StyleSheet } from "react-native";
 import React from "react";
 
 type Props = Omit<React.ComponentProps<typeof PaperModal>, "children"> & {
@@ -30,7 +30,7 @@ export default function Modal({
         {...props}
       >
         {header && <View style={styles.title}>{header}</View>}
-        {content && <View style={styles.content}>{content}</View>}
+        {content && <ScrollView style={styles.content}>{content}</ScrollView>}
         {actions && <View style={styles.actions}>{actions}</View>}
       </PaperModal>
     </Portal>
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   modal: {
     margin: 30,
     borderRadius: 5,
+    maxHeight: "80%", // I use this to limit the height of the modal
   },
   title: {
     paddingVertical: 16,

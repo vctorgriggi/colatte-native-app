@@ -44,6 +44,11 @@ export const NetworkProvider = ({
     return () => clearInterval(interval);
   }, [snackbarDismissed, modalVisible]);
 
+  const handleClose = () => {
+    setModalVisible(false);
+    setSnackbarDismissed(true);
+  };
+
   return (
     <React.Fragment>
       <NetworkContext.Provider value={{ isConnected }}>
@@ -61,19 +66,13 @@ export const NetworkProvider = ({
         }
         actions={
           <React.Fragment>
-            <CancelButton
-              onPress={() => setModalVisible(false)}
+            {/* <CancelButton
+              onPress={handleClose}
               textColor={colors.onSurface}
               close
-            />
-            <DefaultButton
-              textColor={colors.onSurface}
-              onPress={() => {
-                setModalVisible(false);
-                setSnackbarDismissed(true);
-                // TODO: later, add a way to check for connection again
-              }}
-            >
+            /> */}
+            {/* TODO: later, add a way to check for connection again */}
+            <DefaultButton textColor={colors.onSurface} onPress={handleClose}>
               Ok
             </DefaultButton>
           </React.Fragment>
